@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { useCodes } from '@/context/CodeContext';
+import { generateLegendItems } from '@/lib/codeUtils';
 
 import {
   empresas,
@@ -62,6 +63,7 @@ export function CodeGenerator() {
   const [generatedCode, setGeneratedCode] = useState('');
   const [history, setHistory] = useState<string[]>([]);
   const [copied, setCopied] = useState<Record<string, boolean>>({});
+  const [legendItems, setLegendItems] = useState<{ title: string; text: string }[]>([]);
 
   const handleInputChange = (field: keyof FormState, value: string | Date | undefined) => {
     setFormState(prevState => ({ ...prevState, [field]: value }));
@@ -95,6 +97,7 @@ export function CodeGenerator() {
     setGeneratedCode(code);
     setHistory(prev => [code, ...prev].slice(0, 10));
     addCode({ name: nome, code });
+    setLegendItems(generateLegendItems(code));
     toast({
       title: "Código Gerado e Salvo!",
       description: "O novo código foi adicionado à sua lista.",
@@ -237,6 +240,24 @@ export function CodeGenerator() {
             <Button variant="outline" onClick={() => handleExport('image')}>Exportar como Imagem</Button>
             <Button variant="outline" onClick={() => handleExport('pdf')}>Exportar como PDF</Button>
           </CardFooter>
+        </Card>
+      )}
+
+      {legendItems.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Legenda do Código Gerado</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ul className="space-y-2 text-sm">
+              {legendItems.map((item, index) => (
+                <li key={index} className="grid grid-cols-1 md:grid-cols-3 gap-2 items-start">
+                  <span className="font-semibold col-span-1">{item.title}:</span>
+                  <span className="md:col-span-2">{item.text}</span>
+                </li>
+              ))}
+            </ul>
+          </CardContent>
         </Card>
       )}
 
