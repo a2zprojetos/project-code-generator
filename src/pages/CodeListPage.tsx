@@ -1,6 +1,5 @@
-
 import { useState } from 'react';
-import { useCodes } from '@/context/CodeContext';
+import { useCodes, type CodeRecord } from '@/context/CodeContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -72,7 +71,7 @@ export function CodeListPage() {
                         <div className="flex-1 min-w-0">
                           <CardTitle className="text-lg leading-tight break-words">{record.name}</CardTitle>
                           <p className="text-sm text-muted-foreground pt-1">
-                            {new Date(record.createdAt).toLocaleDateString('pt-BR')}
+                            {record.createdAt.toLocaleDateString('pt-BR')}
                           </p>
                         </div>
                         <div className="flex items-center shrink-0 ml-2 space-x-1">
@@ -119,7 +118,7 @@ export function CodeListPage() {
                       <TableRow key={record.id}>
                         <TableCell className="font-medium">{record.name}</TableCell>
                         <TableCell><code className="font-mono text-sm">{record.code}</code></TableCell>
-                        <TableCell>{new Date(record.createdAt).toLocaleDateString('pt-BR')}</TableCell>
+                        <TableCell>{record.createdAt.toLocaleDateString('pt-BR')}</TableCell>
                         <TableCell>
                           <Dialog>
                             <DialogTrigger asChild>
