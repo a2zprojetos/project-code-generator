@@ -13,6 +13,7 @@ import { format } from 'date-fns';
 import { useToast } from "@/hooks/use-toast";
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import { useCodes } from '@/context/CodeContext';
 
 import {
   empresas,
@@ -37,10 +38,12 @@ interface FormState {
   numero: string;
   data: Date | undefined;
   versao: string;
+  nome: string;
 }
 
 export function CodeGenerator() {
   const { toast } = useToast();
+  const { addCode } = useCodes();
   const generatedCodeCardRef = useRef<HTMLDivElement>(null);
   const [formState, setFormState] = useState<FormState>({
     empresa: empresas[0].value,
@@ -54,6 +57,7 @@ export function CodeGenerator() {
     numero: '0001',
     data: new Date(),
     versao: 'R0',
+    nome: '',
   });
   const [generatedCode, setGeneratedCode] = useState('');
   const [history, setHistory] = useState<string[]>([]);
@@ -64,7 +68,16 @@ export function CodeGenerator() {
   };
 
   const handleGenerateCode = () => {
-    const { empresa, localidade, servico, sistema, componente, etapa, disciplina, tipoDoc, numero, data, versao } = formState;
+    const { empresa, localidade, servico, sistema, componente, etapa, disciplina, tipoDoc, numero, data, versao, nome } = formState;
+
+    if (!nome.trim()) {
+      toast({
+        title: "Erro",
+        description: "Por favor, insira um nome para o código.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     if (!data) {
       toast({
@@ -81,6 +94,11 @@ export function CodeGenerator() {
     const code = `${empresa}-${localidade}-${servico}-${sistema}-${componente}-${etapa}-${disciplina}-${tipoDoc}-${numeroFormatado}-${dataFormatada}-${versao}`;
     setGeneratedCode(code);
     setHistory(prev => [code, ...prev].slice(0, 10));
+    addCode({ name: nome, code });
+    toast({
+      title: "Código Gerado e Salvo!",
+      description: "O novo código foi adicionado à sua lista.",
+    });
   };
   
   const handleCopy = (textToCopy: string, id: string) => {
@@ -141,7 +159,7 @@ export function CodeGenerator() {
   );
 
   return (
-    <div className="container mx-auto p-4 space-y-8">
+    <div className="space-y-8">
       <header className="text-center">
         <h1 className="text-3xl font-bold">Gerador de Código de Projeto</h1>
         <p className="text-muted-foreground">Preencha os campos para gerar um código único.</p>
@@ -150,51 +168,57 @@ export function CodeGenerator() {
       <Card>
         <CardHeader><CardTitle>Parâmetros do Código</CardTitle></CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-            {renderSelect('empresa', 'Empresa', empresas)}
-            {renderSelect('localidade', 'Cidade/Estado', localidades)}
-            {renderSelect('servico', 'Serviço', servicos)}
-            {renderSelect('sistema', 'Sistema/Categoria', sistemas)}
-            {renderSelect('componente', 'Componente', componentes)}
-            {renderSelect('etapa', 'Etapa', etapas)}
-            {renderSelect('disciplina', 'Disciplina', disciplinas)}
-            {renderSelect('tipoDoc', 'Tipo de Documento', tipoDocumento)}
+          <div className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="numero">Número Sequencial (4 dígitos)</Label>
-              <Input id="numero" type="number" value={formState.numero} onChange={(e) => handleInputChange('numero', e.target.value)} />
+              <Label htmlFor="nome">Nome do Código</Label>
+              <Input id="nome" placeholder="Ex: Projeto Principal da Barra" value={formState.nome} onChange={(e) => handleInputChange('nome', e.target.value)} />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="data">Data</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant={"outline"}
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !formState.data && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {formState.data ? format(formState.data, "dd/MM/yyyy") : <span>Escolha uma data</span>}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={formState.data}
-                    onSelect={(date) => handleInputChange('data', date)}
-                    initialFocus
-                    className={cn("p-3 pointer-events-auto")}
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="versao">Versão</Label>
-              <Input id="versao" value={formState.versao} onChange={(e) => handleInputChange('versao', e.target.value)} />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {renderSelect('empresa', 'Empresa', empresas)}
+              {renderSelect('localidade', 'Cidade/Estado', localidades)}
+              {renderSelect('servico', 'Serviço', servicos)}
+              {renderSelect('sistema', 'Sistema/Categoria', sistemas)}
+              {renderSelect('componente', 'Componente', componentes)}
+              {renderSelect('etapa', 'Etapa', etapas)}
+              {renderSelect('disciplina', 'Disciplina', disciplinas)}
+              {renderSelect('tipoDoc', 'Tipo de Documento', tipoDocumento)}
+              <div className="space-y-2">
+                <Label htmlFor="numero">Número Sequencial (4 dígitos)</Label>
+                <Input id="numero" type="number" value={formState.numero} onChange={(e) => handleInputChange('numero', e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="data">Data</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant={"outline"}
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !formState.data && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {formState.data ? format(formState.data, "dd/MM/yyyy") : <span>Escolha uma data</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      selected={formState.data}
+                      onSelect={(date) => handleInputChange('data', date)}
+                      initialFocus
+                      className={cn("p-3 pointer-events-auto")}
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="versao">Versão</Label>
+                <Input id="versao" value={formState.versao} onChange={(e) => handleInputChange('versao', e.target.value)} />
+              </div>
             </div>
           </div>
-          <Button onClick={handleGenerateCode} className="w-full">Gerar Código</Button>
+          <Button onClick={handleGenerateCode} className="w-full mt-6">Gerar e Salvar Código</Button>
         </CardContent>
       </Card>
 
