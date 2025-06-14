@@ -1,7 +1,7 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -11,6 +11,8 @@ import { cn } from "@/lib/utils";
 import { Calendar as CalendarIcon, Copy, CopyCheck } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from "@/hooks/use-toast";
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 import {
   empresas,
@@ -39,6 +41,7 @@ interface FormState {
 
 export function CodeGenerator() {
   const { toast } = useToast();
+  const generatedCodeCardRef = useRef<HTMLDivElement>(null);
   const [formState, setFormState] = useState<FormState>({
     empresa: empresas[0].value,
     localidade: localidades[0].value,
@@ -88,6 +91,39 @@ export function CodeGenerator() {
       description: "O código foi copiado para a área de transferência.",
     });
     setTimeout(() => setCopied(prevState => ({ ...prevState, [id]: false })), 2000);
+  };
+
+  const handleExport = (type: 'pdf' | 'image') => {
+    if (generatedCodeCardRef.current) {
+      toast({
+        title: "Exportando...",
+        description: `Gerando ${type === 'pdf' ? 'PDF' : 'imagem'}, por favor aguarde.`,
+      });
+      html2canvas(generatedCodeCardRef.current, { backgroundColor: null, scale: 2 }).then((canvas) => {
+        if (type === 'image') {
+          const imgData = canvas.toDataURL('image/png');
+          const link = document.createElement('a');
+          link.href = imgData;
+          link.download = `${generatedCode}.png`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        } else {
+          const imgData = canvas.toDataURL('image/png');
+          const pdf = new jsPDF({
+            orientation: 'landscape',
+            unit: 'px',
+            format: [canvas.width, canvas.height]
+          });
+          pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+          pdf.save(`${generatedCode}.pdf`);
+        }
+        toast({
+          title: "Sucesso!",
+          description: `O ${type === 'pdf' ? 'PDF' : 'imagem'} foi baixado.`,
+        });
+      });
+    }
   };
 
   const renderSelect = (id: keyof FormState, label: string, options: { value: string, label: string }[]) => (
@@ -163,14 +199,20 @@ export function CodeGenerator() {
       </Card>
 
       {generatedCode && (
-        <Card>
-          <CardHeader><CardTitle>Código Gerado</CardTitle></CardHeader>
-          <CardContent className="flex items-center justify-between bg-muted p-4 rounded-md">
-            <code className="text-lg font-mono break-all">{generatedCode}</code>
+        <Card ref={generatedCodeCardRef} className="overflow-hidden">
+          <CardHeader>
+            <CardTitle>Código Gerado</CardTitle>
+          </CardHeader>
+          <CardContent className="flex items-center justify-between bg-muted p-4">
+            <code className="text-lg font-mono break-all mr-4">{generatedCode}</code>
             <Button variant="ghost" size="icon" onClick={() => handleCopy(generatedCode, 'main')}>
               {copied['main'] ? <CopyCheck className="h-5 w-5 text-green-500" /> : <Copy className="h-5 w-5" />}
             </Button>
           </CardContent>
+          <CardFooter className="flex flex-wrap justify-end gap-2 p-4 border-t">
+            <Button variant="outline" onClick={() => handleExport('image')}>Exportar como Imagem</Button>
+            <Button variant="outline" onClick={() => handleExport('pdf')}>Exportar como PDF</Button>
+          </CardFooter>
         </Card>
       )}
 
@@ -181,7 +223,7 @@ export function CodeGenerator() {
             <ul className="space-y-2">
               {history.map((code, index) => (
                 <li key={index} className="flex items-center justify-between bg-muted/50 p-3 rounded-md">
-                  <span className="font-mono text-sm break-all">{code}</span>
+                  <span className="font-mono text-sm break-all mr-2">{code}</span>
                   <Button variant="ghost" size="icon" onClick={() => handleCopy(code, `history-${index}`)}>
                      {copied[`history-${index}`] ? <CopyCheck className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
                   </Button>
