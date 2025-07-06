@@ -7,8 +7,11 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import { CodeProvider } from "./context/CodeContext";
+import { AuthProvider } from "./context/AuthContext";
 import { DashboardLayout } from "./pages/DashboardLayout";
 import { CodeListPage } from "./pages/CodeListPage";
+import { AuthPage } from "./pages/AuthPage";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -17,18 +20,21 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <CodeProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route element={<DashboardLayout />}>
-              <Route path="/" element={<Index />} />
-              <Route path="/codes" element={<CodeListPage />} />
-            </Route>
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </CodeProvider>
+      <AuthProvider>
+        <CodeProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/auth" element={<AuthPage />} />
+              <Route element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
+                <Route path="/" element={<Index />} />
+                <Route path="/codes" element={<CodeListPage />} />
+              </Route>
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </CodeProvider>
+      </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
