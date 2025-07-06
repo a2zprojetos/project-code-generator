@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
@@ -25,7 +25,7 @@ export function AuthPage() {
     name: '',
     email: '',
     password: '',
-    role: 'user' as UserRole,
+    role: '',
     invitationToken: ''
   });
 
@@ -189,19 +189,15 @@ export function AuthPage() {
                 
                 <div className="space-y-2">
                   <Label htmlFor="signup-role">Função</Label>
-                  <Select
+                  <Input
+                    id="signup-role"
+                    type="text"
                     value={signupForm.role}
-                    onValueChange={(value: UserRole) => setSignupForm(prev => ({ ...prev, role: value }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione sua função" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="user">Usuário</SelectItem>
-                      <SelectItem value="manager">Gerente</SelectItem>
-                      <SelectItem value="admin">Administrador</SelectItem>
-                    </SelectContent>
-                  </Select>
+                    onChange={(e) => setSignupForm(prev => ({ ...prev, role: e.target.value as UserRole }))}
+                    required
+                    disabled={isLoading}
+                    placeholder="Digite sua função (ex: desenvolvedor, analista, etc.)"
+                  />
                 </div>
                 
                 <div className="space-y-2">
