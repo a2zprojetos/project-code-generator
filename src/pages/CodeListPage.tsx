@@ -15,13 +15,6 @@ import {
 import { generateLegendItems } from '@/lib/codeUtils';
 import { useIsMobile } from '@/hooks/use-mobile';
 
-interface CodeRecord {
-  id: string;
-  name: string;
-  code: string;
-  createdAt: string;
-}
-
 const LegendDialogContent = ({ code }: { code: string }) => (
   <DialogContent className="sm:max-w-[625px]">
     <DialogHeader>
