@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
-import { Copy, CopyCheck, BookText } from 'lucide-react';
+import { Copy, CopyCheck, BookText, Trash2 } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -12,6 +12,17 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { generateLegendItems } from '@/lib/codeUtils';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -32,7 +43,7 @@ const LegendDialogContent = ({ code }: { code: string }) => (
 );
 
 export function CodeListPage() {
-  const { codes } = useCodes();
+  const { codes, deleteCode } = useCodes();
   const { toast } = useToast();
   const [copied, setCopied] = useState<Record<string, boolean>>({});
   const isMobile = useIsMobile();
@@ -45,6 +56,22 @@ export function CodeListPage() {
       description: "O código foi copiado para a área de transferência.",
     });
     setTimeout(() => setCopied(prevState => ({ ...prevState, [id]: false })), 2000);
+  };
+
+  const handleDelete = async (codeId: string, codeName: string) => {
+    try {
+      await deleteCode(codeId);
+      toast({
+        title: "Código excluído!",
+        description: `O código "${codeName}" foi excluído com sucesso. O número pode ser reutilizado.`,
+      });
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Não foi possível excluir o código. Tente novamente.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -79,6 +106,31 @@ export function CodeListPage() {
                           <Button variant="ghost" size="icon" onClick={() => handleCopy(record.code, record.id)}>
                             {copied[record.id] ? <CopyCheck className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
                           </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button variant="ghost" size="icon" className="text-red-600 hover:text-red-700 hover:bg-red-50">
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Tem certeza que deseja excluir o código "{record.name}"? 
+                                  Esta ação não pode ser desfeita. O número {record.code.split('-')[8]} ficará disponível para reutilização.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                <AlertDialogAction 
+                                  onClick={() => handleDelete(record.id, record.name)}
+                                  className="bg-red-600 hover:bg-red-700"
+                                >
+                                  Excluir
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
                         </div>
                       </div>
                     </CardHeader>
@@ -125,9 +177,36 @@ export function CodeListPage() {
                           </Dialog>
                         </TableCell>
                         <TableCell className="text-right">
-                          <Button variant="ghost" size="icon" onClick={() => handleCopy(record.code, record.id)}>
-                            {copied[record.id] ? <CopyCheck className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
-                          </Button>
+                          <div className="flex items-center justify-end gap-1">
+                            <Button variant="ghost" size="icon" onClick={() => handleCopy(record.code, record.id)}>
+                              {copied[record.id] ? <CopyCheck className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+                            </Button>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button variant="ghost" size="icon" className="text-red-600 hover:text-red-700 hover:bg-red-50">
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Tem certeza que deseja excluir o código "{record.name}"? 
+                                    Esta ação não pode ser desfeita. O número {record.code.split('-')[8]} ficará disponível para reutilização.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                  <AlertDialogAction 
+                                    onClick={() => handleDelete(record.id, record.name)}
+                                    className="bg-red-600 hover:bg-red-700"
+                                  >
+                                    Excluir
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))
