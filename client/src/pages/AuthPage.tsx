@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
+import logoA2Z from '@assets/476284185_9672782622732554_7779269226472463925_n (1)_1751931917903.jpg';
 
 export function AuthPage() {
   const [isLoading, setIsLoading] = useState(false);
@@ -103,6 +104,13 @@ export function AuthPage() {
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
+          <div className="flex justify-center mb-4">
+            <img 
+              src={logoA2Z} 
+              alt="A2Z Projetos" 
+              className="h-20 w-auto object-contain"
+            />
+          </div>
           <CardTitle className="text-2xl">Sistema de Códigos</CardTitle>
           <CardDescription>
             Faça login ou cadastre-se para acessar

@@ -10,6 +10,7 @@ import {
   SidebarMenuButton,
 } from '@/components/ui/sidebar';
 import { Separator } from '@/components/ui/separator';
+import logoA2Z from '@assets/476284185_9672782622732554_7779269226472463925_n (1)_1751931917903.jpg';
 
 export function AppSidebar() {
   const location = useLocation();
@@ -30,7 +31,15 @@ export function AppSidebar() {
   return (
     <Sidebar>
       <SidebarHeader>
-        <h2 className="text-lg font-semibold px-2">Menu</h2>
+        <div className="flex flex-col items-center p-4">
+          <img 
+            src={logoA2Z} 
+            alt="A2Z Projetos" 
+            className="h-12 w-auto object-contain mb-2"
+          />
+          <h2 className="text-lg font-semibold">Menu</h2>
+        </div>
+        <Separator />
       </SidebarHeader>
       <SidebarContent>
         <SidebarMenu>

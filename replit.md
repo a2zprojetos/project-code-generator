@@ -107,6 +107,7 @@ Changelog:
   - Frontend mantido com todas funcionalidades originais
   - Adicionados tipos de documento faltantes no Supabase
   - Sistema de geração de códigos funcionando completamente
+  - Logo da A2Z Projetos integrada na tela de login e barra lateral
 ```
 
 ## User Preferences
