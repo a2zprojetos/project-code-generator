@@ -61,12 +61,12 @@ export function CodeListPage() {
                   <Card key={record.id}>
                     <CardHeader>
                       <div className="flex justify-between items-start">
-                        <div className="flex-1 min-w-0">
-                          <CardTitle className="text-lg leading-tight break-words">{record.name}</CardTitle>
-                          <p className="text-sm text-muted-foreground pt-1">
-                            {record.createdAt.toLocaleDateString('pt-BR')}
-                          </p>
-                        </div>
+                         <div className="flex-1 min-w-0">
+                           <CardTitle className="text-lg leading-tight break-words">{record.name}</CardTitle>
+                           <p className="text-sm text-muted-foreground pt-1">
+                             Por: {record.user_name} • {record.createdAt.toLocaleDateString('pt-BR')}
+                           </p>
+                         </div>
                         <div className="flex items-center shrink-0 ml-2 space-x-1">
                            <Dialog>
                             <DialogTrigger asChild>
@@ -97,22 +97,24 @@ export function CodeListPage() {
             <div className="border rounded-md">
               <Table>
                 <TableHeader>
-                  <TableRow>
-                    <TableHead>Nome</TableHead>
-                    <TableHead>Código</TableHead>
-                    <TableHead>Data de Criação</TableHead>
-                    <TableHead>Legenda</TableHead>
-                    <TableHead className="text-right">Ações</TableHead>
-                  </TableRow>
+                   <TableRow>
+                     <TableHead>Nome</TableHead>
+                     <TableHead>Código</TableHead>
+                     <TableHead>Criado por</TableHead>
+                     <TableHead>Data de Criação</TableHead>
+                     <TableHead>Legenda</TableHead>
+                     <TableHead className="text-right">Ações</TableHead>
+                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {codes.length > 0 ? (
                     codes.map((record: CodeRecord) => (
-                      <TableRow key={record.id}>
-                        <TableCell className="font-medium">{record.name}</TableCell>
-                        <TableCell><code className="font-mono text-sm">{record.code}</code></TableCell>
-                        <TableCell>{record.createdAt.toLocaleDateString('pt-BR')}</TableCell>
-                        <TableCell>
+                       <TableRow key={record.id}>
+                         <TableCell className="font-medium">{record.name}</TableCell>
+                         <TableCell><code className="font-mono text-sm">{record.code}</code></TableCell>
+                         <TableCell className="text-sm text-muted-foreground">{record.user_name}</TableCell>
+                         <TableCell>{record.createdAt.toLocaleDateString('pt-BR')}</TableCell>
+                         <TableCell>
                           <Dialog>
                             <DialogTrigger asChild>
                               <Button variant="outline" size="icon">
@@ -130,11 +132,11 @@ export function CodeListPage() {
                       </TableRow>
                     ))
                   ) : (
-                    <TableRow>
-                      <TableCell colSpan={5} className="h-24 text-center">
-                        Nenhum código gerado ainda.
-                      </TableCell>
-                    </TableRow>
+                     <TableRow>
+                       <TableCell colSpan={6} className="h-24 text-center">
+                         Nenhum código gerado ainda.
+                       </TableCell>
+                     </TableRow>
                   )}
                 </TableBody>
               </Table>

@@ -1,5 +1,5 @@
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -15,17 +15,6 @@ import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { useCodes } from '@/context/CodeContext';
 import { generateLegendItems } from '@/lib/codeUtils';
-
-import {
-  empresas,
-  localidades,
-  servicos,
-  sistemas,
-  componentes,
-  etapas,
-  disciplinas,
-  tipoDocumento
-} from '@/data/semiCodes';
 
 interface FormState {
   empresa: string;
@@ -44,17 +33,17 @@ interface FormState {
 
 export function CodeGenerator() {
   const { toast } = useToast();
-  const { addCode } = useCodes();
+  const { addCode, codeOptions, loading } = useCodes();
   const generatedCodeCardRef = useRef<HTMLDivElement>(null);
   const [formState, setFormState] = useState<FormState>({
-    empresa: empresas[0].value,
-    localidade: localidades[0].value,
-    servico: servicos[0].value,
-    sistema: sistemas[0].value,
-    componente: componentes[0].value,
-    etapa: etapas[0].value,
-    disciplina: disciplinas[0].value,
-    tipoDoc: tipoDocumento[0].value,
+    empresa: '',
+    localidade: '',
+    servico: '',
+    sistema: '',
+    componente: '',
+    etapa: '',
+    disciplina: '',
+    tipoDoc: '',
     numero: '0001',
     data: new Date(),
     versao: 'R0',
@@ -69,7 +58,7 @@ export function CodeGenerator() {
     setFormState(prevState => ({ ...prevState, [field]: value }));
   };
 
-  const handleGenerateCode = () => {
+  const handleGenerateCode = async () => {
     const { empresa, localidade, servico, sistema, componente, etapa, disciplina, tipoDoc, numero, data, versao, nome } = formState;
 
     if (!nome.trim()) {
@@ -90,18 +79,51 @@ export function CodeGenerator() {
       return;
     }
 
+    if (!empresa || !localidade || !servico || !sistema || !componente || !etapa || !disciplina || !tipoDoc) {
+      toast({
+        title: "Erro",
+        description: "Por favor, preencha todos os campos obrigatórios.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const numeroFormatado = numero.padStart(4, '0');
     const dataFormatada = format(data, 'ddMMyy');
 
     const code = `${empresa}-${localidade}-${servico}-${sistema}-${componente}-${etapa}-${disciplina}-${tipoDoc}-${numeroFormatado}-${dataFormatada}-${versao}`;
-    setGeneratedCode(code);
-    setHistory(prev => [code, ...prev].slice(0, 10));
-    addCode({ name: nome, code });
-    setLegendItems(generateLegendItems(code));
-    toast({
-      title: "Código Gerado e Salvo!",
-      description: "O novo código foi adicionado à sua lista.",
-    });
+    
+    try {
+      await addCode({
+        name: nome,
+        code,
+        empresa,
+        localidade,
+        servico,
+        sistema,
+        componente,
+        etapa,
+        disciplina,
+        tipo_documento: tipoDoc,
+        numero: numeroFormatado,
+        data,
+        versao
+      });
+
+      setGeneratedCode(code);
+      setHistory(prev => [code, ...prev].slice(0, 10));
+      setLegendItems(generateLegendItems(code));
+      toast({
+        title: "Código Gerado e Salvo!",
+        description: "O novo código foi adicionado à sua lista.",
+      });
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Erro ao salvar o código. Tente novamente.",
+        variant: "destructive",
+      });
+    }
   };
   
   const handleCopy = (textToCopy: string, id: string) => {
@@ -151,7 +173,9 @@ export function CodeGenerator() {
     <div className="space-y-2">
       <Label htmlFor={id}>{label}</Label>
       <Select value={formState[id] as string} onValueChange={(value) => handleInputChange(id, value)}>
-        <SelectTrigger id={id}><SelectValue /></SelectTrigger>
+        <SelectTrigger id={id}>
+          <SelectValue placeholder={`Selecione ${label.toLowerCase()}`} />
+        </SelectTrigger>
         <SelectContent>
           {options.map(option => (
             <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
@@ -160,6 +184,34 @@ export function CodeGenerator() {
       </Select>
     </div>
   );
+
+  // Initialize form with first options when codeOptions are loaded
+  useEffect(() => {
+    if (codeOptions.empresas.length > 0 && !formState.empresa) {
+      setFormState(prev => ({
+        ...prev,
+        empresa: codeOptions.empresas[0]?.value || '',
+        localidade: codeOptions.localidades[0]?.value || '',
+        servico: codeOptions.servicos[0]?.value || '',
+        sistema: codeOptions.sistemas[0]?.value || '',
+        componente: codeOptions.componentes[0]?.value || '',
+        etapa: codeOptions.etapas[0]?.value || '',
+        disciplina: codeOptions.disciplinas[0]?.value || '',
+        tipoDoc: codeOptions.tipoDocumento[0]?.value || '',
+      }));
+    }
+  }, [codeOptions]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p>Carregando opções...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -177,14 +229,14 @@ export function CodeGenerator() {
               <Input id="nome" placeholder="Ex: Projeto Principal da Barra" value={formState.nome} onChange={(e) => handleInputChange('nome', e.target.value)} />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {renderSelect('empresa', 'Empresa', empresas)}
-              {renderSelect('localidade', 'Cidade/Estado', localidades)}
-              {renderSelect('servico', 'Serviço', servicos)}
-              {renderSelect('sistema', 'Sistema/Categoria', sistemas)}
-              {renderSelect('componente', 'Componente', componentes)}
-              {renderSelect('etapa', 'Etapa', etapas)}
-              {renderSelect('disciplina', 'Disciplina', disciplinas)}
-              {renderSelect('tipoDoc', 'Tipo de Documento', tipoDocumento)}
+              {renderSelect('empresa', 'Empresa', codeOptions.empresas)}
+              {renderSelect('localidade', 'Cidade/Estado', codeOptions.localidades)}
+              {renderSelect('servico', 'Serviço', codeOptions.servicos)}
+              {renderSelect('sistema', 'Sistema/Categoria', codeOptions.sistemas)}
+              {renderSelect('componente', 'Componente', codeOptions.componentes)}
+              {renderSelect('etapa', 'Etapa', codeOptions.etapas)}
+              {renderSelect('disciplina', 'Disciplina', codeOptions.disciplinas)}
+              {renderSelect('tipoDoc', 'Tipo de Documento', codeOptions.tipoDocumento)}
               <div className="space-y-2">
                 <Label htmlFor="numero">Número Sequencial (4 dígitos)</Label>
                 <Input id="numero" type="number" value={formState.numero} onChange={(e) => handleInputChange('numero', e.target.value)} />
