@@ -105,6 +105,8 @@ Changelog:
   - Aplicação rodando com sucesso na porta 5000
   - Backend simplificado para servir apenas assets estáticos
   - Frontend mantido com todas funcionalidades originais
+  - Adicionados tipos de documento faltantes no Supabase
+  - Sistema de geração de códigos funcionando completamente
 ```
 
 ## User Preferences

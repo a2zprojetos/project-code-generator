@@ -15,7 +15,6 @@ import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { useCodes } from '@/context/CodeContext';
 import { generateLegendItems } from '@/lib/codeUtils';
-import { addDocumentTypesToSupabase } from '@/utils/addDocumentTypes';
 
 interface FormState {
   empresa: string;
@@ -223,19 +222,7 @@ export function CodeGenerator() {
 
       <Card>
         <CardHeader>
-          <div className="flex justify-between items-center">
-            <CardTitle>Parâmetros do Código</CardTitle>
-            {codeOptions.tipoDocumento.length === 0 && (
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={addDocumentTypesToSupabase}
-                className="text-xs"
-              >
-                Adicionar Tipos de Documento
-              </Button>
-            )}
-          </div>
+          <CardTitle>Parâmetros do Código</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-6">
