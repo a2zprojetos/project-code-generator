@@ -64,13 +64,19 @@ export const CodeProvider = ({ children }: { children: ReactNode }) => {
 
   const loadCodeOptions = async () => {
     try {
+      console.log('Loading code options...');
       const { data, error } = await supabase
         .from('code_options')
         .select('*')
         .eq('is_active', true)
         .order('label');
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error loading code options:', error);
+        throw error;
+      }
+
+      console.log('Code options data:', data);
 
       const options: CodeOptions = {
         empresas: [],
@@ -90,6 +96,7 @@ export const CodeProvider = ({ children }: { children: ReactNode }) => {
         }
       });
 
+      console.log('Processed options:', options);
       setCodeOptions(options);
     } catch (error) {
       console.error('Error loading code options:', error);
