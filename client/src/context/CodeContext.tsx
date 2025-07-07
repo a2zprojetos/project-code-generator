@@ -193,33 +193,19 @@ export const CodeProvider = ({ children }: { children: ReactNode }) => {
 
   const getNextSequentialNumber = async (): Promise<string> => {
     try {
-      // Buscar todos os números existentes ordenados
+      // Buscar todos os códigos para contar quantos existem
       const { data, error } = await supabase
         .from('project_codes')
-        .select('numero')
-        .order('numero', { ascending: true });
+        .select('id')
+        .eq('user_id', user?.id || '');
 
       if (error) {
-        console.error('Error fetching numbers:', error);
+        console.error('Error fetching codes count:', error);
         return '0001';
       }
 
-      if (!data || data.length === 0) {
-        return '0001'; // Primeiro código
-      }
-
-      // Converter números para inteiros e encontrar o primeiro gap
-      const usedNumbers = data.map(item => parseInt(item.numero, 10)).sort((a, b) => a - b);
-      
-      // Encontrar o primeiro número disponível
-      let nextNumber = 1;
-      for (const num of usedNumbers) {
-        if (num === nextNumber) {
-          nextNumber++;
-        } else if (num > nextNumber) {
-          break; // Encontrou um gap
-        }
-      }
+      // O próximo número é sempre a quantidade atual + 1
+      const nextNumber = (data?.length || 0) + 1;
       
       // Formatar com zeros à esquerda (4 dígitos)
       return nextNumber.toString().padStart(4, '0');
