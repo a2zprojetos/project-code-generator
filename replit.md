@@ -108,12 +108,6 @@ Changelog:
   - Adicionados tipos de documento faltantes no Supabase
   - Sistema de geração de códigos funcionando completamente
   - Logo da A2Z Projetos integrada na tela de login e barra lateral
-- July 07, 2025. Sistema de numeração automática e exclusão implementado
-  - Numeração automática baseada na quantidade de códigos existentes (count + 1)
-  - Botão "Auto" para gerar próximo número automaticamente
-  - Sistema de exclusão de códigos com confirmação
-  - Reutilização inteligente: próximo número = quantidade_atual + 1
-  - Exemplo: tendo 0001,0002,0003 → próximo = 0004; excluindo 0001 → próximo = 0003
 ```
 
 ## User Preferences
