@@ -33,7 +33,7 @@ interface FormState {
 
 export function CodeGenerator() {
   const { toast } = useToast();
-  const { addCode, codeOptions, loading } = useCodes();
+  const { addCode, codeOptions, loading, getNextSequentialNumber } = useCodes();
   const generatedCodeCardRef = useRef<HTMLDivElement>(null);
   const [formState, setFormState] = useState<FormState>({
     empresa: '',
@@ -56,6 +56,23 @@ export function CodeGenerator() {
 
   const handleInputChange = (field: keyof FormState, value: string | Date | undefined) => {
     setFormState(prevState => ({ ...prevState, [field]: value }));
+  };
+
+  const handleGenerateNextNumber = async () => {
+    try {
+      const nextNumber = await getNextSequentialNumber();
+      handleInputChange('numero', nextNumber);
+      toast({
+        title: "Número gerado!",
+        description: `Próximo número sequencial: ${nextNumber}`,
+      });
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Não foi possível gerar o próximo número.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleGenerateCode = async () => {
@@ -202,6 +219,22 @@ export function CodeGenerator() {
     }
   }, [codeOptions]);
 
+  // Auto-load next sequential number when component mounts
+  useEffect(() => {
+    const loadNextNumber = async () => {
+      if (!loading && !formState.numero) {
+        try {
+          const nextNumber = await getNextSequentialNumber();
+          handleInputChange('numero', nextNumber);
+        } catch (error) {
+          console.error('Error loading next number:', error);
+        }
+      }
+    };
+    
+    loadNextNumber();
+  }, [loading, getNextSequentialNumber, formState.numero]);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -241,7 +274,23 @@ export function CodeGenerator() {
               {renderSelect('tipoDoc', 'Tipo de Documento', codeOptions.tipoDocumento)}
               <div className="space-y-2">
                 <Label htmlFor="numero">Número Sequencial (4 dígitos)</Label>
-                <Input id="numero" type="number" value={formState.numero} onChange={(e) => handleInputChange('numero', e.target.value)} />
+                <div className="flex gap-2">
+                  <Input 
+                    id="numero" 
+                    value={formState.numero} 
+                    onChange={(e) => handleInputChange('numero', e.target.value)}
+                    placeholder="0001"
+                    className="flex-1"
+                  />
+                  <Button 
+                    type="button"
+                    variant="outline" 
+                    onClick={handleGenerateNextNumber}
+                    className="px-3"
+                  >
+                    Auto
+                  </Button>
+                </div>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="data">Data</Label>

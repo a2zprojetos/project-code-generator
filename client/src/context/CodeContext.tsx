@@ -43,6 +43,7 @@ interface CodeContextType {
   }) => Promise<void>;
   loadCodes: () => Promise<void>;
   loadCodeOptions: () => Promise<void>;
+  getNextSequentialNumber: () => Promise<string>;
 }
 
 const CodeContext = createContext<CodeContextType | undefined>(undefined);
@@ -189,6 +190,36 @@ export const CodeProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const getNextSequentialNumber = async (): Promise<string> => {
+    try {
+      // Buscar todos os códigos para encontrar o maior número
+      const { data, error } = await supabase
+        .from('project_codes')
+        .select('numero')
+        .order('numero', { ascending: false })
+        .limit(1);
+
+      if (error) {
+        console.error('Error fetching last number:', error);
+        return '0001'; // Começar do 0001 se houver erro
+      }
+
+      if (!data || data.length === 0) {
+        return '0001'; // Primeiro código
+      }
+
+      // Converter o número para inteiro e incrementar
+      const lastNumber = parseInt(data[0].numero, 10);
+      const nextNumber = lastNumber + 1;
+      
+      // Formatar com zeros à esquerda (4 dígitos)
+      return nextNumber.toString().padStart(4, '0');
+    } catch (error) {
+      console.error('Error generating next number:', error);
+      return '0001';
+    }
+  };
+
   useEffect(() => {
     loadCodeOptions();
   }, []);
@@ -209,7 +240,8 @@ export const CodeProvider = ({ children }: { children: ReactNode }) => {
       loading, 
       addCode, 
       loadCodes, 
-      loadCodeOptions 
+      loadCodeOptions,
+      getNextSequentialNumber
     }}>
       {children}
     </CodeContext.Provider>
