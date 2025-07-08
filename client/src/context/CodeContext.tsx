@@ -202,6 +202,7 @@ export const CodeProvider = ({ children }: { children: ReactNode }) => {
     numero: string;
     data: Date;
     versao: string;
+    contratante: string;
   }) => {
     if (!user || !profile) return;
 
