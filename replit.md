@@ -108,6 +108,13 @@ Changelog:
   - Adicionados tipos de documento faltantes no Supabase
   - Sistema de geração de códigos funcionando completamente
   - Logo da A2Z Projetos integrada na tela de login e barra lateral
+- July 08, 2025. Sistema de contratantes implementado
+  - Campo contratante adicionado ao gerador de códigos
+  - Contratantes IGU e CAH configurados inicialmente
+  - Botão "+" permite adicionar novos contratantes
+  - Códigos agora incluem contratante no início do formato
+  - Resolvido problema de permissões do Supabase (RLS desabilitado)
+  - Sistema de abreviação automática para novos contratantes
 ```
 
 ## User Preferences
