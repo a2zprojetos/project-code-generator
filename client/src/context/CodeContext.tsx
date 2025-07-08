@@ -130,24 +130,8 @@ export const CodeProvider = ({ children }: { children: ReactNode }) => {
         allData.push(...defaultContratantes);
         console.log('Added default contratantes to local state');
         
-        // Tentar inserir no Supabase em background (sem aguardar)
-        (async () => {
-          try {
-            for (const contratante of defaultContratantes) {
-              await supabase
-                .from('code_options')
-                .insert({
-                  category: contratante.category,
-                  value: contratante.value,
-                  label: contratante.label,
-                  is_active: contratante.is_active
-                });
-            }
-            console.log('Background insertion to Supabase completed');
-          } catch (error) {
-            console.log('Background insertion failed, but local state is working');
-          }
-        })();
+        // Contratantes serão inseridos manualmente no Supabase via SQL
+        console.log('Contratantes loaded from local state - manual Supabase insertion required');
       }
 
       const options: CodeOptions = {
@@ -361,23 +345,24 @@ export const CodeProvider = ({ children }: { children: ReactNode }) => {
         return existingOption.value;
       }
 
-      // Adicionar diretamente no Supabase
-      const { data: insertData, error } = await supabase
-        .from('code_options')
-        .insert({
-          category: 'contratantes',
+      // Adicionar via API do backend que usa PostgreSQL direto
+      const response = await fetch('/api/contratantes', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
           value: abreviacao,
           label: label,
-          is_active: true
-        })
-        .select();
+        }),
+      });
 
-      if (error) {
-        console.error('Error adding contratante via Supabase:', error);
-        throw error;
+      if (!response.ok) {
+        throw new Error('Erro ao adicionar contratante via API');
       }
 
-      console.log('Contratante added successfully:', insertData);
+      const result = await response.json();
+      console.log('Contratante added via API:', result);
 
       // Atualizar options localmente
       setCodeOptions(prev => ({

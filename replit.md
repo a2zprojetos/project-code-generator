@@ -110,11 +110,12 @@ Changelog:
   - Logo da A2Z Projetos integrada na tela de login e barra lateral
 - July 08, 2025. Sistema de contratantes implementado
   - Campo contratante adicionado ao gerador de códigos
-  - Contratantes IGU e CAH configurados inicialmente
-  - Botão "+" permite adicionar novos contratantes
-  - Códigos agora incluem contratante no início do formato
-  - Resolvido problema de permissões do Supabase (RLS desabilitado)
+  - Contratantes IGU e CAH configurados no estado local
+  - Botão "+" permite adicionar novos contratantes via API backend
+  - Códigos incluem contratante no formato: CONTRATANTE-EMPRESA-LOCALIDADE-...
+  - API backend criada para inserção direta no PostgreSQL
   - Sistema de abreviação automática para novos contratantes
+  - IMPORTANTE: Execute supabase_fix.sql no painel do Supabase para resolver RLS
 ```
 
 ## User Preferences
