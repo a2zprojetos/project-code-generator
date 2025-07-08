@@ -68,9 +68,36 @@ export const CodeProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const { user, profile } = useAuth();
 
+  const ensureContratantesExist = () => {
+    // Adicionar contratantes padrão se não existirem no estado local
+    const defaultContratantes = [
+      { value: 'IGU', label: 'IGU - IGUÁ' },
+      { value: 'CAH', label: 'CAH - CARVALHO HOSKEN' }
+    ];
+    
+    setCodeOptions(prev => {
+      const existingContratantes = prev.contratantes || [];
+      const newContratantes = [...existingContratantes];
+      
+      // Adicionar apenas contratantes que não existem
+      defaultContratantes.forEach(defaultContratante => {
+        const exists = existingContratantes.some(existing => 
+          existing.value === defaultContratante.value
+        );
+        if (!exists) {
+          newContratantes.push(defaultContratante);
+        }
+      });
+      
+      return {
+        ...prev,
+        contratantes: newContratantes.sort((a, b) => a.label.localeCompare(b.label))
+      };
+    });
+  };
+
   const loadCodeOptions = async () => {
     try {
-      console.log('Loading code options...');
       const { data, error } = await supabase
         .from('code_options')
         .select('*')
@@ -81,8 +108,6 @@ export const CodeProvider = ({ children }: { children: ReactNode }) => {
         console.error('Error loading code options:', error);
         throw error;
       }
-
-      console.log('Code options data:', data);
 
       const options: CodeOptions = {
         empresas: [],
@@ -103,8 +128,10 @@ export const CodeProvider = ({ children }: { children: ReactNode }) => {
         }
       });
 
-      console.log('Processed options:', options);
       setCodeOptions(options);
+      
+      // Garantir que contratantes existam após carregar as opções
+      ensureContratantesExist();
     } catch (error) {
       console.error('Error loading code options:', error);
     }
@@ -295,6 +322,7 @@ export const CodeProvider = ({ children }: { children: ReactNode }) => {
       }
 
       // Adicionar ao Supabase
+      console.log('Attempting to add contratante:', { abreviacao, label });
       const { data, error } = await supabase
         .from('code_options')
         .insert({
@@ -304,6 +332,8 @@ export const CodeProvider = ({ children }: { children: ReactNode }) => {
           is_active: true
         })
         .select();
+
+      console.log('Supabase insert result:', { data, error });
 
       if (error) {
         console.error('Error adding contratante:', error);
