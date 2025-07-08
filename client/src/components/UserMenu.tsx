@@ -83,7 +83,7 @@ export function UserMenu() {
     }
   };
 
-  if (!user || !profile) return null;
+  if (!user) return null;
 
   return (
     <DropdownMenu>
@@ -95,18 +95,20 @@ export function UserMenu() {
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">{profile.name}</p>
+            <p className="text-sm font-medium leading-none">{profile?.name || user.email}</p>
             <p className="text-xs leading-none text-muted-foreground">
               {user.email}
             </p>
-            <Badge variant={getRoleBadgeVariant(profile.role)} className="w-fit mt-1">
-              {profile.role}
-            </Badge>
+            {profile?.role && (
+              <Badge variant={getRoleBadgeVariant(profile.role)} className="w-fit mt-1">
+                {profile.role}
+              </Badge>
+            )}
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         
-        {profile.role === 'admin' && (
+        {profile?.role === 'admin' && (
           <>
             <Dialog>
               <DialogTrigger asChild>
