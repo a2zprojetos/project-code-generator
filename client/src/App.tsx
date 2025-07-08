@@ -11,6 +11,7 @@ import { AuthProvider } from "./context/AuthContext";
 import { DashboardLayout } from "./pages/DashboardLayout";
 import { CodeListPage } from "./pages/CodeListPage";
 import { AuthPage } from "./pages/AuthPage";
+import { DashboardPage } from "./pages/DashboardPage";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => (
               <Route element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
                 <Route path="/" element={<Index />} />
                 <Route path="/codes" element={<CodeListPage />} />
+                <Route path="/dashboard" element={<DashboardPage />} />
               </Route>
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />

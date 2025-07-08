@@ -1,6 +1,6 @@
 
 import { Link, useLocation } from 'react-router-dom';
-import { Code, List } from 'lucide-react';
+import { Code, List, BarChart3 } from 'lucide-react';
 import {
   Sidebar,
   SidebarContent,
@@ -25,6 +25,11 @@ export function AppSidebar() {
       href: '/codes',
       label: 'Códigos Salvos',
       icon: List,
+    },
+    {
+      href: '/dashboard',
+      label: 'Dashboard',
+      icon: BarChart3,
     },
   ];
 
