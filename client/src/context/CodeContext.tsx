@@ -20,6 +20,7 @@ interface CodeOptions {
   etapas: { value: string; label: string }[];
   disciplinas: { value: string; label: string }[];
   tipoDocumento: { value: string; label: string }[];
+  contratantes: { value: string; label: string }[];
 }
 
 interface CodeContextType {
@@ -40,11 +41,13 @@ interface CodeContextType {
     numero: string;
     data: Date;
     versao: string;
+    contratante: string;
   }) => Promise<void>;
   deleteCode: (codeId: string) => Promise<void>;
   loadCodes: () => Promise<void>;
   loadCodeOptions: () => Promise<void>;
   getNextSequentialNumber: () => Promise<string>;
+  addContratante: (nomeCompleto: string) => Promise<string>;
 }
 
 const CodeContext = createContext<CodeContextType | undefined>(undefined);
@@ -88,7 +91,8 @@ export const CodeProvider = ({ children }: { children: ReactNode }) => {
         componentes: [],
         etapas: [],
         disciplinas: [],
-        tipoDocumento: []
+        tipoDocumento: [],
+        contratantes: []
       };
 
       data?.forEach(option => {
@@ -168,7 +172,8 @@ export const CodeProvider = ({ children }: { children: ReactNode }) => {
           tipo_documento: codeData.tipo_documento,
           numero: codeData.numero,
           data: codeData.data.toISOString().split('T')[0],
-          versao: codeData.versao
+          versao: codeData.versao,
+          contratante: codeData.contratante
         })
         .select()
         .single();
@@ -252,6 +257,72 @@ export const CodeProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const generateAbbreviation = (nomeCompleto: string): string => {
+    // Remover artigos e preposições comuns
+    const stopWords = ['e', 'da', 'do', 'das', 'dos', 'de', 'a', 'o', 'as', 'os'];
+    
+    const words = nomeCompleto
+      .toUpperCase()
+      .replace(/[^A-Z\s]/g, '') // Remove caracteres especiais
+      .split(' ')
+      .filter(word => word.length > 0 && !stopWords.includes(word.toLowerCase()));
+
+    if (words.length === 1) {
+      // Se for uma palavra só, pega as 3 primeiras letras
+      return words[0].substring(0, 3);
+    } else if (words.length === 2) {
+      // Se forem duas palavras, pega primeira letra de cada + primeira letra da segunda palavra
+      return words[0].substring(0, 2) + words[1].substring(0, 1);
+    } else {
+      // Se forem três ou mais palavras, pega primeira letra de cada uma das 3 primeiras
+      return words.slice(0, 3).map(word => word[0]).join('');
+    }
+  };
+
+  const addContratante = async (nomeCompleto: string): Promise<string> => {
+    try {
+      const abreviacao = generateAbbreviation(nomeCompleto);
+      const label = `${abreviacao} - ${nomeCompleto}`;
+
+      // Verificar se já existe
+      const existingOption = codeOptions.contratantes.find(
+        option => option.label.toLowerCase() === label.toLowerCase()
+      );
+
+      if (existingOption) {
+        return existingOption.value;
+      }
+
+      // Adicionar ao Supabase
+      const { data, error } = await supabase
+        .from('code_options')
+        .insert({
+          category: 'contratantes',
+          value: abreviacao,
+          label: label,
+          is_active: true
+        })
+        .select();
+
+      if (error) {
+        console.error('Error adding contratante:', error);
+        throw error;
+      }
+
+      // Atualizar options localmente
+      setCodeOptions(prev => ({
+        ...prev,
+        contratantes: [...prev.contratantes, { value: abreviacao, label }]
+          .sort((a, b) => a.label.localeCompare(b.label))
+      }));
+
+      return abreviacao;
+    } catch (error) {
+      console.error('Error adding contratante:', error);
+      throw error;
+    }
+  };
+
   useEffect(() => {
     loadCodeOptions();
   }, []);
@@ -274,7 +345,8 @@ export const CodeProvider = ({ children }: { children: ReactNode }) => {
       deleteCode,
       loadCodes, 
       loadCodeOptions,
-      getNextSequentialNumber
+      getNextSequentialNumber,
+      addContratante
     }}>
       {children}
     </CodeContext.Provider>

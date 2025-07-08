@@ -17,11 +17,12 @@ const findLabel = (options: { value: string, label: string }[], value: string) =
 
 export const generateLegendItems = (code: string) => {
   const parts = code.split('-');
-  if (parts.length < 11) {
+  if (parts.length < 12) {
     return [{ title: "Erro", text: "Código inválido para gerar legenda." }];
   }
 
   const [
+    contratanteVal,
     empresaVal,
     localidadeVal,
     servicoVal,
@@ -36,6 +37,7 @@ export const generateLegendItems = (code: string) => {
   ] = parts;
 
   const legendItems = [
+    { title: 'Contratante', text: `${contratanteVal} - Contratante` },
     { title: 'Empresa', text: findLabel(empresas, empresaVal) },
     { title: 'Cidade/Estado', text: findLabel(localidades, localidadeVal) },
     { title: 'Serviço', text: findLabel(servicos, servicoVal) },

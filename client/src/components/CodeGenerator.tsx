@@ -29,11 +29,12 @@ interface FormState {
   data: Date | undefined;
   versao: string;
   nome: string;
+  contratante: string;
 }
 
 export function CodeGenerator() {
   const { toast } = useToast();
-  const { addCode, codeOptions, loading, getNextSequentialNumber } = useCodes();
+  const { addCode, codeOptions, loading, getNextSequentialNumber, addContratante } = useCodes();
   const generatedCodeCardRef = useRef<HTMLDivElement>(null);
   const [formState, setFormState] = useState<FormState>({
     empresa: '',
@@ -48,6 +49,7 @@ export function CodeGenerator() {
     data: new Date(),
     versao: 'R0',
     nome: '',
+    contratante: '',
   });
   const [generatedCode, setGeneratedCode] = useState('');
   const [history, setHistory] = useState<string[]>([]);
@@ -76,7 +78,7 @@ export function CodeGenerator() {
   };
 
   const handleGenerateCode = async () => {
-    const { empresa, localidade, servico, sistema, componente, etapa, disciplina, tipoDoc, numero, data, versao, nome } = formState;
+    const { empresa, localidade, servico, sistema, componente, etapa, disciplina, tipoDoc, numero, data, versao, nome, contratante } = formState;
 
     if (!nome.trim()) {
       toast({
@@ -96,10 +98,10 @@ export function CodeGenerator() {
       return;
     }
 
-    if (!empresa || !localidade || !servico || !sistema || !componente || !etapa || !disciplina || !tipoDoc) {
+    if (!empresa || !localidade || !servico || !sistema || !componente || !etapa || !disciplina || !tipoDoc || !contratante) {
       toast({
         title: "Erro",
-        description: "Por favor, preencha todos os campos obrigatórios.",
+        description: "Por favor, preencha todos os campos obrigatórios, incluindo o contratante.",
         variant: "destructive",
       });
       return;
@@ -108,7 +110,7 @@ export function CodeGenerator() {
     const numeroFormatado = numero.padStart(4, '0');
     const dataFormatada = format(data, 'ddMMyy');
 
-    const code = `${empresa}-${localidade}-${servico}-${sistema}-${componente}-${etapa}-${disciplina}-${tipoDoc}-${numeroFormatado}-${dataFormatada}-${versao}`;
+    const code = `${contratante}-${empresa}-${localidade}-${servico}-${sistema}-${componente}-${etapa}-${disciplina}-${tipoDoc}-${numeroFormatado}-${dataFormatada}-${versao}`;
     
     try {
       await addCode({
@@ -124,7 +126,8 @@ export function CodeGenerator() {
         tipo_documento: tipoDoc,
         numero: numeroFormatado,
         data,
-        versao
+        versao,
+        contratante
       });
 
       setGeneratedCode(code);
@@ -215,6 +218,7 @@ export function CodeGenerator() {
         etapa: codeOptions.etapas[0]?.value || '',
         disciplina: codeOptions.disciplinas[0]?.value || '',
         tipoDoc: codeOptions.tipoDocumento[0]?.value || '',
+        // Não inicializar contratante automaticamente para forçar seleção consciente
       }));
     }
   }, [codeOptions]);
@@ -264,6 +268,48 @@ export function CodeGenerator() {
               <Input id="nome" placeholder="Ex: Projeto Principal da Barra" value={formState.nome} onChange={(e) => handleInputChange('nome', e.target.value)} />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="contratante">Contratante *</Label>
+                <div className="flex gap-2">
+                  <Select value={formState.contratante} onValueChange={(value) => handleInputChange('contratante', value)}>
+                    <SelectTrigger className="flex-1">
+                      <SelectValue placeholder="Selecione ou adicione contratante" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {codeOptions.contratantes.map(option => (
+                        <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Button 
+                    type="button"
+                    variant="outline" 
+                    onClick={() => {
+                      const nomeCompleto = prompt('Digite o nome completo do contratante:');
+                      if (nomeCompleto && nomeCompleto.trim()) {
+                        addContratante(nomeCompleto.trim())
+                          .then(abreviacao => {
+                            handleInputChange('contratante', abreviacao);
+                            toast({
+                              title: "Contratante adicionado!",
+                              description: `${abreviacao} - ${nomeCompleto} foi adicionado com sucesso.`,
+                            });
+                          })
+                          .catch(() => {
+                            toast({
+                              title: "Erro",
+                              description: "Não foi possível adicionar o contratante.",
+                              variant: "destructive",
+                            });
+                          });
+                      }
+                    }}
+                    className="px-3"
+                  >
+                    +
+                  </Button>
+                </div>
+              </div>
               {renderSelect('empresa', 'Empresa', codeOptions.empresas)}
               {renderSelect('localidade', 'Cidade/Estado', codeOptions.localidades)}
               {renderSelect('servico', 'Serviço', codeOptions.servicos)}
