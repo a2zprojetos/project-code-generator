@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import { CodeProvider } from "./context/CodeContext";
 import { AuthProvider } from "./context/AuthContext";
+import { ThemeProvider } from "./context/ThemeContext";
 import { DashboardLayout } from "./pages/DashboardLayout";
 import { CodeListPage } from "./pages/CodeListPage";
 import { AuthPage } from "./pages/AuthPage";
@@ -18,12 +19,13 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <AuthProvider>
-        <CodeProvider>
-          <BrowserRouter>
+    <ThemeProvider defaultTheme="system" storageKey="codigo-generator-theme">
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <AuthProvider>
+          <CodeProvider>
+            <BrowserRouter>
             <Routes>
               <Route path="/auth" element={<AuthPage />} />
               <Route element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
@@ -34,10 +36,11 @@ const App = () => (
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
-          </BrowserRouter>
-        </CodeProvider>
-      </AuthProvider>
-    </TooltipProvider>
+            </BrowserRouter>
+          </CodeProvider>
+        </AuthProvider>
+      </TooltipProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 
