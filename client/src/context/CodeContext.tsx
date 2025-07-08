@@ -345,24 +345,39 @@ export const CodeProvider = ({ children }: { children: ReactNode }) => {
         return existingOption.value;
       }
 
-      // Adicionar via API do backend que usa PostgreSQL direto
-      const response = await fetch('/api/contratantes', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      // Adicionar diretamente no Supabase (agora que RLS foi desabilitado)
+      const { data: insertData, error } = await supabase
+        .from('code_options')
+        .insert({
+          category: 'contratantes',
           value: abreviacao,
           label: label,
-        }),
-      });
+          is_active: true
+        })
+        .select();
 
-      if (!response.ok) {
-        throw new Error('Erro ao adicionar contratante via API');
+      if (error) {
+        console.error('Error adding contratante to Supabase:', error);
+        // Fallback para API backend
+        const response = await fetch('/api/contratantes', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            value: abreviacao,
+            label: label,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Erro ao adicionar contratante');
+        }
+
+        console.log('Contratante added via API fallback');
+      } else {
+        console.log('Contratante added to Supabase successfully:', insertData);
       }
-
-      const result = await response.json();
-      console.log('Contratante added via API:', result);
 
       // Atualizar options localmente
       setCodeOptions(prev => ({
@@ -370,6 +385,9 @@ export const CodeProvider = ({ children }: { children: ReactNode }) => {
         contratantes: [...prev.contratantes, { value: abreviacao, label }]
           .sort((a, b) => a.label.localeCompare(b.label))
       }));
+
+      // Recarregar opções para sincronizar com Supabase
+      await loadCodeOptions();
 
       return abreviacao;
     } catch (error) {
