@@ -98,7 +98,7 @@ export const CodeProvider = ({ children }: { children: ReactNode }) => {
 
   const loadCodeOptions = async () => {
     try {
-      // Forçar refresh do cache do Supabase
+      // Forçar refresh do cache do Supabase com timestamp
       const { data, error } = await supabase
         .from('code_options')
         .select('*')
@@ -111,20 +111,25 @@ export const CodeProvider = ({ children }: { children: ReactNode }) => {
       }
 
       console.log('Raw data from Supabase:', data?.length, 'items');
+      console.log('All categories:', [...new Set(data?.map(item => item.category))]);
       console.log('Contratantes found:', data?.filter(item => item.category === 'contratantes'));
       
-      // Se não temos contratantes no Supabase, vamos adicioná-los ao state local
-      let allData = data || [];
-      const contratantesExistentes = allData.filter(item => item.category === 'contratantes') || [];
+      // Contratantes devem ter sido inseridos via SQL no banco
+      const allData = data || [];
+      
+      // Verificar se contratantes foram carregados
+      const contratantesExistentes = allData.filter(item => item.category === 'contratantes');
       if (contratantesExistentes.length === 0) {
-        console.log('Adding default contratantes to local state...');
+        console.log('Contratantes not found in Supabase - adding to local state...');
+        // Adicionar contratantes padrão ao estado local
         const defaultContratantes = [
           { id: 'local-igu', category: 'contratantes', value: 'IGU', label: 'IGU - IGUÁ', is_active: true },
           { id: 'local-cah', category: 'contratantes', value: 'CAH', label: 'CAH - CARVALHO HOSKEN', is_active: true }
         ];
         
-        allData = [...allData, ...defaultContratantes];
-        console.log('Updated data with local contratantes:', allData.length, 'items');
+        // Merge com os dados existentes
+        allData.push(...defaultContratantes);
+        console.log('Added default contratantes to state');
       }
 
       const options: CodeOptions = {
@@ -339,26 +344,20 @@ export const CodeProvider = ({ children }: { children: ReactNode }) => {
         return existingOption.value;
       }
 
-      // Adicionar ao Supabase
-      const { data, error } = await supabase
-        .from('code_options')
-        .insert({
-          category: 'contratantes',
+      // Adicionar via API backend
+      const response = await fetch('/api/contratantes', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
           value: abreviacao,
           label: label,
-          is_active: true
-        })
-        .select();
+        }),
+      });
 
-      if (error) {
-        console.error('Error adding contratante:', error);
-        // Se houver erro, adicionar apenas localmente
-        setCodeOptions(prev => ({
-          ...prev,
-          contratantes: [...prev.contratantes, { value: abreviacao, label }]
-            .sort((a, b) => a.label.localeCompare(b.label))
-        }));
-        return abreviacao;
+      if (!response.ok) {
+        throw new Error('Erro ao adicionar contratante');
       }
 
       // Atualizar options localmente
