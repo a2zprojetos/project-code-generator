@@ -322,7 +322,6 @@ export const CodeProvider = ({ children }: { children: ReactNode }) => {
       }
 
       // Adicionar ao Supabase
-      console.log('Attempting to add contratante:', { abreviacao, label });
       const { data, error } = await supabase
         .from('code_options')
         .insert({
@@ -333,11 +332,15 @@ export const CodeProvider = ({ children }: { children: ReactNode }) => {
         })
         .select();
 
-      console.log('Supabase insert result:', { data, error });
-
       if (error) {
         console.error('Error adding contratante:', error);
-        throw error;
+        // Se houver erro, adicionar apenas localmente
+        setCodeOptions(prev => ({
+          ...prev,
+          contratantes: [...prev.contratantes, { value: abreviacao, label }]
+            .sort((a, b) => a.label.localeCompare(b.label))
+        }));
+        return abreviacao;
       }
 
       // Atualizar options localmente
