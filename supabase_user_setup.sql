@@ -22,7 +22,7 @@ CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
--- 3. Verificar se a tabela user_profiles existe
+-- 3. Criar tabela user_profiles
 CREATE TABLE IF NOT EXISTS public.user_profiles (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -33,16 +33,42 @@ CREATE TABLE IF NOT EXISTS public.user_profiles (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 4. RLS (Row Level Security) para user_profiles
+-- 4. RLS (Row Level Security) para user_profiles - SISTEMA COLABORATIVO
 ALTER TABLE public.user_profiles ENABLE ROW LEVEL SECURITY;
 
--- Política para permitir que usuários vejam e editem seus próprios perfis
-CREATE POLICY "Users can view own profile" ON public.user_profiles
-  FOR SELECT USING (auth.uid() = user_id);
+-- Políticas colaborativas - todos podem ver e criar
+CREATE POLICY "Everyone can view profiles" ON public.user_profiles
+  FOR SELECT USING (true);
+
+CREATE POLICY "Everyone can insert profiles" ON public.user_profiles
+  FOR INSERT WITH CHECK (true);
 
 CREATE POLICY "Users can update own profile" ON public.user_profiles
   FOR UPDATE USING (auth.uid() = user_id);
 
--- Política para permitir inserção (necessária para o trigger)
-CREATE POLICY "Enable insert for authenticated users only" ON public.user_profiles
-  FOR INSERT WITH CHECK (auth.uid() = user_id);
+-- 5. Políticas colaborativas para codes table
+ALTER TABLE public.codes ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Everyone can view codes" ON public.codes
+  FOR SELECT USING (true);
+
+CREATE POLICY "Everyone can insert codes" ON public.codes
+  FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Everyone can update codes" ON public.codes
+  FOR UPDATE USING (true);
+
+CREATE POLICY "Everyone can delete codes" ON public.codes
+  FOR DELETE USING (true);
+
+-- 6. Políticas colaborativas para code_options
+ALTER TABLE public.code_options ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Everyone can view code_options" ON public.code_options
+  FOR SELECT USING (true);
+
+CREATE POLICY "Everyone can insert code_options" ON public.code_options
+  FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Everyone can update code_options" ON public.code_options
+  FOR UPDATE USING (true);

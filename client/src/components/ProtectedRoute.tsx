@@ -21,5 +21,6 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     return <Navigate to="/auth" replace />;
   }
 
+  // Sistema colaborativo - todos os usuários autenticados têm acesso total
   return <>{children}</>;
 }

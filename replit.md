@@ -116,6 +116,13 @@ Changelog:
   - API backend criada para inserção direta no PostgreSQL
   - Sistema de abreviação automática para novos contratantes
   - IMPORTANTE: Execute supabase_fix.sql no painel do Supabase para resolver RLS
+- July 08, 2025. Sistema totalmente colaborativo implementado
+  - Migração completa para Supabase com token "admin-token-2024"
+  - Sistema colaborativo: todos usuários podem ver e criar códigos
+  - Criação automática de perfis via triggers do Supabase
+  - Dashboard com estatísticas e gráficos interativos
+  - Sistema de tema escuro/claro com persistência
+  - RLS configurado para acesso colaborativo em todas as tabelas
 ```
 
 ## User Preferences
