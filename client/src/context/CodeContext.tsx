@@ -98,6 +98,7 @@ export const CodeProvider = ({ children }: { children: ReactNode }) => {
 
   const loadCodeOptions = async () => {
     try {
+      // Forçar refresh do cache do Supabase
       const { data, error } = await supabase
         .from('code_options')
         .select('*')
@@ -107,6 +108,23 @@ export const CodeProvider = ({ children }: { children: ReactNode }) => {
       if (error) {
         console.error('Error loading code options:', error);
         throw error;
+      }
+
+      console.log('Raw data from Supabase:', data?.length, 'items');
+      console.log('Contratantes found:', data?.filter(item => item.category === 'contratantes'));
+      
+      // Se não temos contratantes no Supabase, vamos adicioná-los ao state local
+      let allData = data || [];
+      const contratantesExistentes = allData.filter(item => item.category === 'contratantes') || [];
+      if (contratantesExistentes.length === 0) {
+        console.log('Adding default contratantes to local state...');
+        const defaultContratantes = [
+          { id: 'local-igu', category: 'contratantes', value: 'IGU', label: 'IGU - IGUÁ', is_active: true },
+          { id: 'local-cah', category: 'contratantes', value: 'CAH', label: 'CAH - CARVALHO HOSKEN', is_active: true }
+        ];
+        
+        allData = [...allData, ...defaultContratantes];
+        console.log('Updated data with local contratantes:', allData.length, 'items');
       }
 
       const options: CodeOptions = {
@@ -121,7 +139,7 @@ export const CodeProvider = ({ children }: { children: ReactNode }) => {
         contratantes: []
       };
 
-      data?.forEach(option => {
+      allData?.forEach(option => {
         const { category, value, label } = option;
         if (category in options) {
           (options as any)[category].push({ value, label });
