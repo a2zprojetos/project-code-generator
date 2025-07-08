@@ -88,11 +88,14 @@ export function UserMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon">
-          <User className="h-5 w-5" />
+        <Button variant="ghost" className="relative h-10 w-10 rounded-full group hover:shadow-lg transition-all duration-200">
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full blur opacity-0 group-hover:opacity-20 transition-opacity"></div>
+          <div className="p-2 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 text-white">
+            <User className="h-5 w-5" />
+          </div>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56">
+      <DropdownMenuContent align="end" className="w-64 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border border-white/20 dark:border-gray-700/30 shadow-2xl">
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none">{profile?.name || user.email}</p>

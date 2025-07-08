@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
-import { Calendar as CalendarIcon, Copy, CopyCheck } from 'lucide-react';
+import { Calendar as CalendarIcon, Copy, CopyCheck, Code } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from "@/hooks/use-toast";
 import html2canvas from 'html2canvas';
@@ -251,17 +251,28 @@ export function CodeGenerator() {
   }
 
   return (
-    <div className="space-y-8">
-      <header className="text-center">
-        <h1 className="text-3xl font-bold">Gerador de Código de Projeto</h1>
-        <p className="text-muted-foreground">Preencha os campos para gerar um código único.</p>
+    <div className="space-y-8 animate-fade-in">
+      <header className="text-center space-y-4">
+        <div className="flex justify-center">
+          <div className="relative">
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl blur opacity-20"></div>
+            <div className="relative bg-white dark:bg-gray-800 p-3 rounded-xl border border-white/20 dark:border-gray-700/30">
+              <Code className="h-8 w-8 text-primary" />
+            </div>
+          </div>
+        </div>
+        <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+          Gerador de Código de Projeto
+        </h1>
+        <p className="text-lg text-muted-foreground">Preencha os campos para gerar um código único</p>
       </header>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Parâmetros do Código</CardTitle>
+      <Card className="relative overflow-hidden border-0 bg-gradient-to-br from-white to-gray-50/50 dark:from-gray-900 dark:to-gray-800/50 shadow-2xl">
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-purple-500/5"></div>
+        <CardHeader className="relative">
+          <CardTitle className="text-xl font-semibold">Parâmetros do Código</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="relative">
           <div className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="nome">Nome do Código</Label>
@@ -370,7 +381,13 @@ export function CodeGenerator() {
               </div>
             </div>
           </div>
-          <Button onClick={handleGenerateCode} className="w-full mt-6">Gerar e Salvar Código</Button>
+          <Button 
+            onClick={handleGenerateCode} 
+            className="w-full mt-6 gradient-bg hover:opacity-90 transition-all duration-200 shadow-lg hover:shadow-xl font-medium text-lg py-6"
+          >
+            <Code className="mr-2 h-5 w-5" />
+            Gerar e Salvar Código
+          </Button>
         </CardContent>
       </Card>
 

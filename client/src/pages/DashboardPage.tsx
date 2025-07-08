@@ -104,10 +104,20 @@ export function DashboardPage() {
   }, [codes, codeOptions]);
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center gap-3 mb-6">
-        <TrendingUp className="h-8 w-8 text-primary" />
-        <h1 className="text-3xl font-bold">Dashboard - Estatísticas</h1>
+    <div className="container mx-auto p-6 space-y-8 animate-fade-in">
+      <div className="flex items-center gap-4 mb-8">
+        <div className="relative">
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl blur opacity-20"></div>
+          <div className="relative bg-white dark:bg-gray-800 p-3 rounded-xl border border-white/20 dark:border-gray-700/30">
+            <TrendingUp className="h-8 w-8 text-primary" />
+          </div>
+        </div>
+        <div>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+            Dashboard
+          </h1>
+          <p className="text-lg text-muted-foreground mt-1">Estatísticas detalhadas do sistema</p>
+        </div>
       </div>
 
       {/* Cards de resumo */}

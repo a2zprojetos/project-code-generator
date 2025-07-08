@@ -101,26 +101,52 @@ export function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <div className="flex justify-center mb-4">
-            <img 
-              src={logoA2Z} 
-              alt="A2Z Projetos" 
-              className="h-20 w-auto object-contain"
-            />
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-slate-900 p-4 animate-fade-in relative overflow-hidden">
+      {/* Background decorative elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-purple-600/20 rounded-full blur-3xl"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-indigo-400/20 to-cyan-600/20 rounded-full blur-3xl"></div>
+      </div>
+      
+      <Card className="w-full max-w-md relative z-10 backdrop-blur-sm bg-white/90 dark:bg-gray-900/90 border-white/20 dark:border-gray-700/30 shadow-2xl animate-scale-in">
+        <CardHeader className="text-center space-y-6">
+          <div className="flex justify-center">
+            <div className="relative group">
+              <div className="absolute -inset-2 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-all duration-500"></div>
+              <div className="relative bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl p-4 rounded-2xl border border-white/20 dark:border-gray-700/30 shadow-lg">
+                <img 
+                  src={logoA2Z} 
+                  alt="A2Z Projetos" 
+                  className="h-16 w-auto object-contain"
+                />
+              </div>
+            </div>
           </div>
-          <CardTitle className="text-2xl">Sistema de Códigos</CardTitle>
-          <CardDescription>
-            Faça login ou cadastre-se para acessar
-          </CardDescription>
+          <div className="space-y-2">
+            <CardTitle className="text-3xl font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-indigo-900 dark:from-white dark:via-blue-200 dark:to-indigo-200 bg-clip-text text-transparent">
+              Sistema de Códigos
+            </CardTitle>
+            <CardDescription className="text-base text-gray-600 dark:text-gray-300">
+              Gerencie seus códigos de projeto com elegância
+            </CardDescription>
+          </div>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="login" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="login" data-value="login">Login</TabsTrigger>
-              <TabsTrigger value="signup">Cadastro</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 bg-gray-100/50 dark:bg-gray-800/50 backdrop-blur-sm p-1 rounded-xl border border-gray-200/50 dark:border-gray-700/50">
+              <TabsTrigger 
+                value="login" 
+                data-value="login"
+                className="rounded-lg font-medium transition-all duration-200 data-[state=active]:bg-white data-[state=active]:shadow-md dark:data-[state=active]:bg-gray-900"
+              >
+                Login
+              </TabsTrigger>
+              <TabsTrigger 
+                value="signup"
+                className="rounded-lg font-medium transition-all duration-200 data-[state=active]:bg-white data-[state=active]:shadow-md dark:data-[state=active]:bg-gray-900"
+              >
+                Cadastro
+              </TabsTrigger>
             </TabsList>
             
             <TabsContent value="login" className="space-y-4">
@@ -149,7 +175,11 @@ export function AuthPage() {
                   />
                 </div>
                 
-                <Button type="submit" className="w-full" disabled={isLoading}>
+                <Button 
+                  type="submit" 
+                  className="w-full gradient-bg hover:opacity-90 transition-all duration-200 shadow-lg hover:shadow-xl font-medium" 
+                  disabled={isLoading}
+                >
                   {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Entrar
                 </Button>
@@ -221,7 +251,11 @@ export function AuthPage() {
                   />
                 </div>
                 
-                <Button type="submit" className="w-full" disabled={isLoading}>
+                <Button 
+                  type="submit" 
+                  className="w-full gradient-bg hover:opacity-90 transition-all duration-200 shadow-lg hover:shadow-xl font-medium" 
+                  disabled={isLoading}
+                >
                   {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Cadastrar
                 </Button>
