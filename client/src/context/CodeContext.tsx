@@ -120,16 +120,34 @@ export const CodeProvider = ({ children }: { children: ReactNode }) => {
       // Verificar se contratantes foram carregados
       const contratantesExistentes = allData.filter(item => item.category === 'contratantes');
       if (contratantesExistentes.length === 0) {
-        console.log('Contratantes not found in Supabase - adding to local state...');
-        // Adicionar contratantes padrão ao estado local
+        console.log('Inserting contratantes directly in Supabase...');
+        
+        // Adicionar ao estado local e tentar inserir no Supabase em background
         const defaultContratantes = [
           { id: 'local-igu', category: 'contratantes', value: 'IGU', label: 'IGU - IGUÁ', is_active: true },
           { id: 'local-cah', category: 'contratantes', value: 'CAH', label: 'CAH - CARVALHO HOSKEN', is_active: true }
         ];
-        
-        // Merge com os dados existentes
         allData.push(...defaultContratantes);
-        console.log('Added default contratantes to state');
+        console.log('Added default contratantes to local state');
+        
+        // Tentar inserir no Supabase em background (sem aguardar)
+        (async () => {
+          try {
+            for (const contratante of defaultContratantes) {
+              await supabase
+                .from('code_options')
+                .insert({
+                  category: contratante.category,
+                  value: contratante.value,
+                  label: contratante.label,
+                  is_active: contratante.is_active
+                });
+            }
+            console.log('Background insertion to Supabase completed');
+          } catch (error) {
+            console.log('Background insertion failed, but local state is working');
+          }
+        })();
       }
 
       const options: CodeOptions = {
@@ -202,7 +220,6 @@ export const CodeProvider = ({ children }: { children: ReactNode }) => {
     numero: string;
     data: Date;
     versao: string;
-    contratante: string;
   }) => {
     if (!user || !profile) return;
 
@@ -224,8 +241,7 @@ export const CodeProvider = ({ children }: { children: ReactNode }) => {
           tipo_documento: codeData.tipo_documento,
           numero: codeData.numero,
           data: codeData.data.toISOString().split('T')[0],
-          versao: codeData.versao,
-          contratante: codeData.contratante
+          versao: codeData.versao
         })
         .select()
         .single();
@@ -345,21 +361,23 @@ export const CodeProvider = ({ children }: { children: ReactNode }) => {
         return existingOption.value;
       }
 
-      // Adicionar via API backend
-      const response = await fetch('/api/contratantes', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      // Adicionar diretamente no Supabase
+      const { data: insertData, error } = await supabase
+        .from('code_options')
+        .insert({
+          category: 'contratantes',
           value: abreviacao,
           label: label,
-        }),
-      });
+          is_active: true
+        })
+        .select();
 
-      if (!response.ok) {
-        throw new Error('Erro ao adicionar contratante');
+      if (error) {
+        console.error('Error adding contratante via Supabase:', error);
+        throw error;
       }
+
+      console.log('Contratante added successfully:', insertData);
 
       // Atualizar options localmente
       setCodeOptions(prev => ({
