@@ -83,7 +83,7 @@ export function AuthPage() {
       } else {
         toast({
           title: "Cadastro realizado com sucesso!",
-          description: "Verifique seu email para confirmar a conta."
+          description: "Você já pode fazer login com suas credenciais."
         });
         // Switch to login tab
         const loginTab = document.querySelector('[data-value="login"]') as HTMLElement;

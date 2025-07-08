@@ -166,10 +166,10 @@ export const CodeProvider = ({ children }: { children: ReactNode }) => {
     if (!user) return;
     
     try {
+      // Sistema colaborativo - carregar TODOS os códigos, não apenas do usuário atual
       const { data, error } = await supabase
         .from('project_codes')
         .select('*')
-        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
