@@ -72,7 +72,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signUp = async (email: string, password: string, name: string, role: UserRole, invitationToken: string) => {
     const redirectUrl = `${window.location.origin}/`;
     
-    // Validate token first
+    console.log('Validando token:', invitationToken);
+    console.log('Data atual:', new Date().toISOString());
+    
+    // Validate token first - primeiro teste sem filtro de data
+    const { data: allTokens, error: getAllError } = await supabase
+      .from('invitation_tokens')
+      .select('*')
+      .eq('token', invitationToken);
+    
+    console.log('Todos os tokens encontrados:', allTokens);
+    
+    // Agora teste com todos os filtros
     const { data: tokenData, error: tokenError } = await supabase
       .from('invitation_tokens')
       .select('*')
@@ -81,9 +92,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .gt('expires_at', new Date().toISOString())
       .single();
 
+    console.log('Resultado da validação:', { tokenData, tokenError });
+
     if (tokenError || !tokenData) {
-      return { error: { message: 'Token de convite inválido ou expirado' } };
+      console.log('Token inválido ou erro:', tokenError);
+      return { error: { message: `Token de convite inválido ou expirado: ${tokenError?.message || 'Token não encontrado'}` } };
     }
+
+    console.log('Token válido, criando usuário...');
 
     const { error } = await supabase.auth.signUp({
       email,
@@ -97,6 +113,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       }
     });
+
+    if (error) {
+      console.log('Erro no signup:', error);
+    } else {
+      console.log('Signup realizado com sucesso');
+    }
 
     return { error };
   };
