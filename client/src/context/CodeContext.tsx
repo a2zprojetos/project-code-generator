@@ -204,6 +204,7 @@ export const CodeProvider = ({ children }: { children: ReactNode }) => {
     numero: string;
     data: Date;
     versao: string;
+    contratante: string;
   }) => {
     if (!user || !profile) return;
 
@@ -225,7 +226,8 @@ export const CodeProvider = ({ children }: { children: ReactNode }) => {
           tipo_documento: codeData.tipo_documento,
           numero: codeData.numero,
           data: codeData.data.toISOString().split('T')[0],
-          versao: codeData.versao
+          versao: codeData.versao,
+          contratante: codeData.contratante
         })
         .select()
         .single();
@@ -293,8 +295,7 @@ export const CodeProvider = ({ children }: { children: ReactNode }) => {
       const { error } = await supabase
         .from('project_codes')
         .delete()
-        .eq('id', codeId)
-        .eq('user_id', user.id); // Garantir que só o usuário pode deletar seus próprios códigos
+        .eq('id', codeId); // Sistema colaborativo - qualquer usuário pode deletar
 
       if (error) {
         console.error('Error deleting code:', error);
