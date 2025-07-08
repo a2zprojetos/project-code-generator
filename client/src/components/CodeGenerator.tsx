@@ -132,7 +132,7 @@ export function CodeGenerator() {
 
       setGeneratedCode(code);
       setHistory(prev => [code, ...prev].slice(0, 10));
-      setLegendItems(generateLegendItems(code));
+      setLegendItems(generateLegendItems(code, codeOptions.contratantes));
       toast({
         title: "Código Gerado e Salvo!",
         description: "O novo código foi adicionado à sua lista.",

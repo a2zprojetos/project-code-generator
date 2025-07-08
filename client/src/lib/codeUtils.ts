@@ -15,7 +15,7 @@ const findLabel = (options: { value: string, label: string }[], value: string) =
   return option ? option.label : `Código "${value}" não encontrado`;
 };
 
-export const generateLegendItems = (code: string) => {
+export const generateLegendItems = (code: string, contratantes?: { value: string, label: string }[]) => {
   const parts = code.split('-');
   if (parts.length < 12) {
     return [{ title: "Erro", text: "Código inválido para gerar legenda." }];
@@ -36,8 +36,11 @@ export const generateLegendItems = (code: string) => {
     versaoVal,
   ] = parts;
 
+  // Buscar o nome completo do contratante
+  const contratanteCompleto = contratantes?.find(c => c.value === contratanteVal)?.label || `${contratanteVal} - Contratante`;
+
   const legendItems = [
-    { title: 'Contratante', text: `${contratanteVal} - Contratante` },
+    { title: 'Contratante', text: contratanteCompleto },
     { title: 'Empresa', text: findLabel(empresas, empresaVal) },
     { title: 'Cidade/Estado', text: findLabel(localidades, localidadeVal) },
     { title: 'Serviço', text: findLabel(servicos, servicoVal) },

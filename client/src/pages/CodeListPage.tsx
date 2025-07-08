@@ -26,14 +26,14 @@ import {
 import { generateLegendItems } from '@/lib/codeUtils';
 import { useIsMobile } from '@/hooks/use-mobile';
 
-const LegendDialogContent = ({ code }: { code: string }) => (
+const LegendDialogContent = ({ code, contratantes }: { code: string, contratantes: { value: string, label: string }[] }) => (
   <DialogContent className="sm:max-w-[625px]">
     <DialogHeader>
       <DialogTitle>Legenda do Código</DialogTitle>
     </DialogHeader>
     <p className="font-mono text-sm pt-2 break-all">{code}</p>
     <div className="space-y-1 text-sm pt-4">
-      {generateLegendItems(code).map((item, index) => (
+      {generateLegendItems(code, contratantes).map((item, index) => (
         <p key={index}>
           <span className="font-semibold">{item.title}:</span> {item.text}
         </p>
@@ -43,7 +43,7 @@ const LegendDialogContent = ({ code }: { code: string }) => (
 );
 
 export function CodeListPage() {
-  const { codes, deleteCode } = useCodes();
+  const { codes, deleteCode, codeOptions } = useCodes();
   const { toast } = useToast();
   const [copied, setCopied] = useState<Record<string, boolean>>({});
   const isMobile = useIsMobile();
@@ -101,7 +101,7 @@ export function CodeListPage() {
                                 <BookText className="h-4 w-4" />
                               </Button>
                             </DialogTrigger>
-                            <LegendDialogContent code={record.code} />
+                            <LegendDialogContent code={record.code} contratantes={codeOptions.contratantes} />
                           </Dialog>
                           <Button variant="ghost" size="icon" onClick={() => handleCopy(record.code, record.id)}>
                             {copied[record.id] ? <CopyCheck className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
@@ -173,7 +173,7 @@ export function CodeListPage() {
                                 <BookText className="h-4 w-4" />
                               </Button>
                             </DialogTrigger>
-                            <LegendDialogContent code={record.code} />
+                            <LegendDialogContent code={record.code} contratantes={codeOptions.contratantes} />
                           </Dialog>
                         </TableCell>
                         <TableCell className="text-right">
