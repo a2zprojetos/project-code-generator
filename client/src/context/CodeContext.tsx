@@ -62,7 +62,8 @@ export const CodeProvider = ({ children }: { children: ReactNode }) => {
     componentes: [],
     etapas: [],
     disciplinas: [],
-    tipoDocumento: []
+    tipoDocumento: [],
+    contratantes: []
   });
   const [loading, setLoading] = useState(true);
   const { user, profile } = useAuth();
